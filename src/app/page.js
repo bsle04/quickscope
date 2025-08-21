@@ -86,16 +86,18 @@ export default function FinancialDashboard() {
     }
   };
 
-  // Aggregate data by category for pie chart
-  const categoryData = transactions.reduce((acc, transaction) => {
-    const amount = Math.abs(parseFloat(transaction.amount));
-    if (acc[transaction.category]) {
-      acc[transaction.category] += amount;
-    } else {
-      acc[transaction.category] = amount;
-    }
-    return acc;
-  }, {});
+  // Aggregate data by category for pie chart (only negative/spending)
+  const categoryData = transactions
+    .filter(transaction => parseFloat(transaction.amount) < 0)
+    .reduce((acc, transaction) => {
+      const amount = Math.abs(parseFloat(transaction.amount));
+      if (acc[transaction.category]) {
+        acc[transaction.category] += amount;
+      } else {
+        acc[transaction.category] = amount;
+      }
+      return acc;
+    }, {});
 
   const pieData = Object.entries(categoryData).map(([category, amount]) => ({
     name: category,
