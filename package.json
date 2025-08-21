@@ -1,0 +1,25 @@
+{
+  "name": "quickscope",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "next": "15.5.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "recharts": "^2.9.0",
+    "lucide-react": "^0.367.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "eslint-config-next": "15.5.0",
+    "@eslint/eslintrc": "^3.0.0",
+    "tailwindcss": "^4.0.0",
+    "@tailwindcss/postcss": "^4.0.0"
+  }
+}
