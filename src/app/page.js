@@ -4,31 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Plus, Trash2, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
 
-// MOCK DATA for frontend-only development
-const MOCK_TRANSACTIONS = [
-  {
-    id: 1,
-    date: "2025-08-01",
-    category: "Food",
-    amount: -25.5,
-    description: "Lunch"
-  },
-  {
-    id: 2,
-    date: "2025-08-02",
-    category: "Salary",
-    amount: 2000,
-    description: "Monthly salary"
-  },
-  {
-    id: 3,
-    date: "2025-08-03",
-    category: "Games",
-    amount: -60,
-    description: "Steam sale"
-  }
-];
-
 const COLORS = [
   '#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#8dd1e1', '#d084d0',
   '#87d068', '#ffc0cb', '#dda0dd', '#98fb98', '#f0e68c', '#ffa07a'
@@ -44,45 +19,71 @@ export default function FinancialDashboard() {
     description: ''
   });
 
+  // Fetch transactions from API
+  const fetchTransactions = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/transactions');
+      const data = await res.json();
+      setTransactions(data);
+    } catch (err) {
+      alert('Failed to fetch transactions');
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
     fetchTransactions();
     // eslint-disable-next-line
   }, []);
 
-  // Mock fetchTransactions
-  const fetchTransactions = async () => {
-    setLoading(true);
-    setTimeout(() => {
-      setTransactions(MOCK_TRANSACTIONS);
-      setLoading(false);
-    }, 500);
-  };
-
-  // Mock addTransaction
+  // Add transaction via API
   const addTransaction = async () => {
     if (!newTransaction.category || !newTransaction.amount) {
       alert('Please fill in required fields');
       return;
     }
-    setTransactions(prev => [
-      ...prev,
-      {
-        ...newTransaction,
-        id: prev.length ? Math.max(...prev.map(t => t.id)) + 1 : 1,
-        amount: parseFloat(newTransaction.amount)
+    setLoading(true);
+    try {
+      const res = await fetch('/api/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...newTransaction,
+          amount: parseFloat(newTransaction.amount)
+        })
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to add transaction');
       }
-    ]);
-    setNewTransaction({
-      date: new Date().toISOString().split('T')[0],
-      category: '',
-      amount: '',
-      description: ''
-    });
+      setNewTransaction({
+        date: new Date().toISOString().split('T')[0],
+        category: '',
+        amount: '',
+        description: ''
+      });
+      fetchTransactions();
+    } catch (err) {
+      alert(err.message);
+      setLoading(false);
+    }
   };
 
-  // Mock deleteTransaction
+  // Delete transaction via API
   const deleteTransaction = async (id) => {
-    setTransactions(prev => prev.filter(t => t.id !== id));
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/transactions/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to delete transaction');
+      }
+      fetchTransactions();
+    } catch (err) {
+      alert(err.message);
+      setLoading(false);
+    }
   };
 
   // Aggregate data by category for pie chart
