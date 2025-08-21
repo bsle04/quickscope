@@ -126,8 +126,26 @@ export default function FinancialDashboard() {
   const barData = Object.values(monthlyData).sort((a, b) => a.month.localeCompare(b.month));
 
   const totalBalance = transactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
-  const totalIncome = transactions.filter(t => parseFloat(t.amount) > 0).reduce((sum, t) => sum + parseFloat(t.amount), 0);
-  const totalExpenses = Math.abs(transactions.filter(t => parseFloat(t.amount) < 0).reduce((sum, t) => sum + parseFloat(t.amount), 0));
+
+  // Monthly income and expenses
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  const monthlyTransactions = transactions.filter(t => {
+    const d = new Date(t.date);
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  });
+
+  const monthlyIncome = monthlyTransactions
+    .filter(t => parseFloat(t.amount) > 0)
+    .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+  const monthlyExpenses = Math.abs(
+    monthlyTransactions
+      .filter(t => parseFloat(t.amount) < 0)
+      .reduce((sum, t) => sum + parseFloat(t.amount), 0)
+  );
 
   if (loading) {
     return (
@@ -147,7 +165,7 @@ export default function FinancialDashboard() {
           <div className={`rounded-lg shadow-lg p-6 ${totalBalance >= 0 ? 'bg-gradient-to-r from-green-50 to-green-100 border border-green-200' : 'bg-gradient-to-r from-red-50 to-red-100 border border-red-200'}`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-700">Total Balance</p>
+                <p className="text-sm font-medium text-gray-700">Net Worth</p>
                 <p className={`text-3xl font-bold ${totalBalance >= 0 ? 'text-green-700' : 'text-red-700'}`}>
                   ${totalBalance.toFixed(2)}
                 </p>
@@ -161,8 +179,8 @@ export default function FinancialDashboard() {
           <div className="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-lg shadow-lg p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-700">Total Income</p>
-                <p className="text-3xl font-bold text-green-700">${totalIncome.toFixed(2)}</p>
+                <p className="text-sm font-medium text-gray-700">Monthly Income</p>
+                <p className="text-3xl font-bold text-green-700">${monthlyIncome.toFixed(2)}</p>
               </div>
               <div className="p-3 rounded-full bg-green-200">
                 <TrendingUp className="h-8 w-8 text-green-700" />
@@ -173,8 +191,8 @@ export default function FinancialDashboard() {
           <div className="bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-lg shadow-lg p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-700">Total Expenses</p>
-                <p className="text-3xl font-bold text-red-700">${totalExpenses.toFixed(2)}</p>
+                <p className="text-sm font-medium text-gray-700">Monthly Expenses</p>
+                <p className="text-3xl font-bold text-red-700">${monthlyExpenses.toFixed(2)}</p>
               </div>
               <div className="p-3 rounded-full bg-red-200">
                 <TrendingDown className="h-8 w-8 text-red-700" />
